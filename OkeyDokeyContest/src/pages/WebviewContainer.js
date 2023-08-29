@@ -16,7 +16,7 @@ const WebviewContainer = () => {
     handleSendMessage(); // handleSendMessage 함수 호출을 추가
   }, [orderNumber]);
 
-  const uri = { uri: 'http://192.168.123.103:5500/javascriptReceiptPrinter/index.html' };
+  const uri = { uri: 'receiptprinter.netlify.app' };
 
   return (
     <View style={{ flex: 1 }}>
