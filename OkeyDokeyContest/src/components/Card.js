@@ -16,8 +16,6 @@ const Card = () => {
   const shoppings = useSelector(state => state.shopping.shoppings); //장바구니에 담긴 배열
   const is_pack = useSelector(state => state.shopping.is_pack); //포장여부
 
-  const [access, setAccess] = useState(null);
-
   const sendData = async shoppings => {
     console.log(shoppings);
     const requestData = {
@@ -30,22 +28,61 @@ const Card = () => {
       })),
     };
 
+    const config = {
+      headers: {
+        Authorization: `Bearer ${await AsyncStorage.getItem('access')}`,
+      },
+    };
+
     try {
       console.log(requestData);
       const response = await axios.post(
         'http://15.164.232.208/order/create/',
         requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${access}`, // Access Token을 Authorization 헤더에 포함
-            // Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjkyOTAyMjI1LCJpYXQiOjE2OTI4MTY4MjUsImp0aSI6ImQ1NzcwZmIwYjI5YTQ4YmE5Zjg4NGZkYjM0NDk0Mjg2IiwidXNlcl9pZCI6M30.jfjBUDwNG6dRcuLXpoq1ZCFv50nmsn3NsFWlO0xH6MM`, // Access Token을 Authorization 헤더에 포함
-          },
-        },
+        config,
       );
       console.log(response.data);
       dispatch(updateOrderNumber(response.data.order_num));
     } catch (error) {
-      console.log('[😝 error ]' + error.message);
+      console.error(error);
+      if (error.response && error.response.status === 401) {
+        try {
+          await refreshAccessToken();
+          console.log('fetchData 재시도');
+          await fetchData();
+        } catch (refreshError) {
+          console.error('토큰 갱신 중 오류:', refreshError);
+          // 추가적인 오류 처리 로직 필요 (예: 사용자를 로그인 페이지로 리다이렉트)
+        }
+      }
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    const body = {
+      refresh: AsyncStorage.getItem('refresh'),
+    };
+
+    try {
+      const response = await axios.post(
+        'http://3.36.95.105/account/refresh/access_token/',
+        body,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      const access = response.data.access;
+      const refresh = response.data.refresh;
+
+      AsyncStorage.setItem('access', access);
+      AsyncStorage.setItem('refresh', refresh);
+      console.log('success : refresh Access Token');
+    } catch (error) {
+      console.error('Error refreshing access token:', error);
+      throw error; // 함수를 호출하는 곳에서 오류를 처리할 수 있도록 오류를 다시 던집니다.
     }
   };
 
@@ -59,22 +96,6 @@ const Card = () => {
       navigation.navigate('OrderNum'); //왔다갔다 다하면 주문번호 화면으로 이동
     }
   }, [animationCount]);
-
-  useEffect(() => {
-    setAccessToken();
-  }, []);
-
-  //access token 받아오기
-  const setAccessToken = async () => {
-    await AsyncStorage.getItem('access')
-      .then(value => {
-        if (value !== null) {
-          console.log('Value retrieved:', value);
-          setAccess(value);
-        }
-      })
-      .catch(error => console.error('Error retrieving data:', error));
-  };
 
   //reverse false면 위로, true면 아래로 이동
   const animatedCard = reverse => {
