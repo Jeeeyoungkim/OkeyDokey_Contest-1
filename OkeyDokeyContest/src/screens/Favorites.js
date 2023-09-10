@@ -23,8 +23,7 @@ import {addShopping} from '../redux/slices/shoppingSlice';
 //즐겨찾는 메뉴 페이지
 ////얼굴인식 성공 -> 본인확인 계속하기 -> 백엔드에서 받아온 이름, 커피(이름,가격,사진)등의 데이터 GET요청
 const Favorites = () => {
-  const [access, setAccess] = useState(null);
-  const [name, setName] = useState(AsyncStorage.getItem('nickname'));
+  const [name, setName] = useState(null);
   const [totalCoffeePrice, setTotalCoffeePrice] = useState(0);
   const [menuData, setMenuData] = useState([]);
 
@@ -73,72 +72,40 @@ const Favorites = () => {
       );
     });
   };
-
-  const fetchData = async () => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${await AsyncStorage.getItem('access')}`,
-      },
-    };
-    try {
-      const response = await axios.get(
-        'http://15.164.232.208/menu/favorite/list/',
-        config,
-      );
-      setMenuData(response.data.OKDK);
-      console.log(response.data.OKDK);
-    } catch (error) {
-      console.error(error);
-      if (error.response && error.response.status === 401) {
-        try {
-          await refreshAccessToken();
-          console.log('fetchData 재시도');
-          await fetchData();
-        } catch (refreshError) {
-          console.error('토큰 갱신 중 오류:', refreshError);
-          // 추가적인 오류 처리 로직 필요 (예: 사용자를 로그인 페이지로 리다이렉트)
-        }
+  //username 받아오기
+  const setUserName = async () => {
+      try{
+        const name = await AsyncStorage.getItem('nickname')
+        setName(name);
+        console.log(name);
       }
-    }
+      catch{
+       console.log('Error retrieving data:', error);
+      }
   };
 
-  const refreshAccessToken = async () => {
-    const body = {
-      refresh: AsyncStorage.getItem('refresh'),
-    };
-
+  const fetchData = async() => {
     try {
-      const response = await axios.post(
-        'http://3.36.95.105/account/refresh/access_token/',
-        body,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+      const access = await AsyncStorage.getItem('access');
+      const response = await axios.get('http://15.164.232.208/menu/favorite/list/', {
+        headers: {
+          Authorization: `Bearer ${access}`, // Access Token을 Authorization 헤더에 포함
         },
-      );
+      });
+    
+      
+      setMenuData(response.data.OKDK);
+      console.log('즐겨찾기 ' + JSON.stringify(response.data));
+      console.log('즐겨찾기메뉴' + response.data.OKDK);
 
-      const access = response.data.access;
-      const refresh = response.data.refresh;
-
-      AsyncStorage.setItem('access', access);
-      AsyncStorage.setItem('refresh', refresh);
-      console.log('success : refresh Access Token');
     } catch (error) {
-      console.error('Error refreshing access token:', error);
-      throw error; // 함수를 호출하는 곳에서 오류를 처리할 수 있도록 오류를 다시 던집니다.
+      console.log('즐겨찾기메뉴 불러오기 에러' + error);
     }
   };
 
-      AsyncStorage.setItem('access', access);
-      AsyncStorage.setItem('refresh', refresh);
-      console.log('success : refresh Access Token');
-    } catch (error) {
-      console.error('Error refreshing access token:', error);
-      throw error; // 함수를 호출하는 곳에서 오류를 처리할 수 있도록 오류를 다시 던집니다.
-    }
-  };
   useEffect(() => {
+    setUserName();
+    // setAccessToken();
     fetchData();
   }, []);
 
