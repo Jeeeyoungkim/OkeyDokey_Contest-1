@@ -27,6 +27,7 @@ import {
 import API from '../API/api';
 import axios from 'axios';
 import QCoffee from './QCoffee';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EasyMenu = ({navigation, route}) => {
   const shoppings = useSelector(state => state.shopping.shoppings);
@@ -37,6 +38,31 @@ const EasyMenu = ({navigation, route}) => {
   const getEasy = () => {
     seteasy(!easy);
   };
+
+
+  
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+        const nonmember = await AsyncStorage.getItem('nonmember');
+        if(!nonmember){
+        navigation.popToTop();
+      }
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
 
   const navigationQcoffee = () => {
     if (whereScreen === 'QCoffee') {
@@ -88,7 +114,7 @@ const EasyMenu = ({navigation, route}) => {
         setAdeList(response.data.find(item => item.name === '에이드'));
         setSmoothieList(response.data.find(item => item.name === '스무디'));
         setTeaList(response.data.find(item => item.name === '티'));
-
+        
         if (whereScreen === 'QCoffee') {
           getEasy();
         } else if (whereScreen === 'Qmilk') {
@@ -113,10 +139,11 @@ const EasyMenu = ({navigation, route}) => {
   const fetchDataEasy = () => {
     API.get(`/menu/list/${qMilkid}`)
       .then(response => {
+        console.log(response.data);
         setDrinkItem(response.data);
       })
       .catch(error => {
-        console.error(error);
+        console.log("fetchDataEasy(easymenu)에러"+ error);
       });
   };
 
@@ -143,6 +170,7 @@ const EasyMenu = ({navigation, route}) => {
   return (
     <View style={{flex: 1, backgroundColor: '#F5F7FB', alignItems: 'center'}}>
       <View style={styles.header}>
+        
         <Image
           style={{width: 150, height: 50}}
           source={require('OkeyDokeyContest/assets/images/OkDkLogo.png')}
@@ -299,9 +327,9 @@ const EasyMenu = ({navigation, route}) => {
             <View style={styles.midItemBox}>
               {drinkItem.map(item => {
                 return (
-                  <>
+                  
                     <Coffee
-                      key={item.length}
+                      key={item.id}
                       navigation={navigation}
                       goto={'ShoppingBasket'}
                       coffeeImageWidth={140}
@@ -311,7 +339,7 @@ const EasyMenu = ({navigation, route}) => {
                       CoffeeName={item.name}
                       CoffeePrice={item.price}
                     />
-                  </>
+                  
                 );
               })}
             </View>
@@ -348,9 +376,9 @@ const EasyMenu = ({navigation, route}) => {
           }}>
           <View
             style={{
-              width: '80%',
+              width: '78%',
               flexDirection: 'row',
-              justifyContent: 'flex-start',
+              justifyContent: 'center',
               alignItems: 'center',
               backgroundColor: 'white',
               height: '80%',
@@ -360,7 +388,7 @@ const EasyMenu = ({navigation, route}) => {
             }}>
             {category.menues.map(item => {
               return (
-                <>
+                
                   <Coffee
                     navigation={navigation}
                     key={item.id}
@@ -371,7 +399,7 @@ const EasyMenu = ({navigation, route}) => {
                     CoffeeName={item.name}
                     CoffeePrice={item.price}
                   />
-                </>
+                
               );
             })}
           </View>
@@ -402,8 +430,9 @@ const EasyMenu = ({navigation, route}) => {
                   flexDirection: 'column',
                 }}>
                 {shoppings.map(item => {
+                  console.log('MAP에 붙일거임' + item);
                   return (
-                    <View
+                    <View key={item.id}
                       style={{
                         width: '100%',
                         marginTop: 10,
@@ -418,7 +447,7 @@ const EasyMenu = ({navigation, route}) => {
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 3 / 6,
+                          flex: 4 / 10,
                         }}>
                         <Text
                           style={{
@@ -442,10 +471,16 @@ const EasyMenu = ({navigation, route}) => {
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 2 / 6,
+                          flex: 4 / 10,
                         }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              flex:1,
+                            }}>
                         <Text
                           style={{
+                            flex:1/3,
                             fontSize: 16,
                             marginRight: 10,
                             color: 'black',
@@ -455,6 +490,7 @@ const EasyMenu = ({navigation, route}) => {
                         </Text>
                         <Text
                           style={{
+                            flex:1/3,
                             fontSize: 16,
                             marginRight: 10,
                             color: 'black',
@@ -464,18 +500,20 @@ const EasyMenu = ({navigation, route}) => {
                         </Text>
                         <Text
                           style={{
+                            flex:1/3,
                             fontSize: 16,
                             color: 'black',
                             fontWeight: 'bold',
                           }}>
                           {item.quantity}잔
                         </Text>
+                        </View>
                       </View>
 
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 1 / 6,
+                          flex: 2 / 10,
                         }}>
                         <CustomButton
                           width={20}

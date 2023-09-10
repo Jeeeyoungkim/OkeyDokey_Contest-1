@@ -4,11 +4,15 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {View, Text, StyleSheet, Image} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useIsFocused} from '@react-navigation/native';
+import {resetShopping} from '../redux/slices/shoppingSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
 
 const Welcome = () => {
   const [distanceSensor, setDistanceSensor] = useState(false);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const dispatch = useDispatch();
   const fetchData = async () => {
     try {
       const response = await axios.get('http://15.164.232.208/OKDK/signal/');
@@ -22,7 +26,20 @@ const Welcome = () => {
       return false;
     }
   };
+  useEffect(() => {
+    clearAsyncStorage();
+    dispatch(resetShopping());
+  },[]);
 
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log('AsyncStorage cleared successfully.');
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error);
+    }
+  };
+  
   useEffect(() => {
     let interval;
     const startLoop = () => {

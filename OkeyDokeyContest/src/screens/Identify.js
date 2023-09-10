@@ -1,5 +1,5 @@
 import {StyleSheet, Image, View, Text, StatusBar} from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import InputModal from '../pages/InputModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FaceModal from '../components/FaceModal';
@@ -9,8 +9,27 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Identify = () => {
-  const navigation = useNavigation();
   const [userData, setUserData] = useState(null); // 회원 정보 상태
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+        navigation.popToTop();
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
 
   const fetchData = async () => {
     const config = {
@@ -76,10 +95,12 @@ const Identify = () => {
   }, []);
 
   // 본인확인된 모종의 부분이 있을거아냐 여기선 userData라고 가정.
-  const handleContinue = () => {
-    navigation.navigate('Home');
+  
+  const handleContinue = async () => {
+    // await AsyncStorage.setItem("nonmember", "nonmember");
+    // navigation.navigate('Home');
+    console.log("여기는 없는게 맞아. 비활성화");
   };
-
   return (
     <SafeAreaView
       style={{

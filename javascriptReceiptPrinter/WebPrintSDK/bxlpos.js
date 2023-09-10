@@ -6,11 +6,14 @@ function getPosData() {
   pos_data.functions = pos_func;
   pos_func = {};
   incPosNum = 0;
-
+  //pos_data.functions에는 
+  console.log(`포스 펑션 : ${JSON.stringify(pos_func)}`)
+  console.log(`pos_data.functions : ${JSON.stringify(pos_data.functions)}, JSON.stringify(pos_data) : ${JSON.stringify(pos_data)}`)
   return JSON.stringify(pos_data);
 }
 
 function setPosId(setId) {
+  console.log(`setPosId 포스아이디: ${setId}`);
   pos_data.id = setId;
 }
 
@@ -18,6 +21,11 @@ function checkPrinterStatus() {
   var _a = { checkPrinterStatus: [] };
   pos_func["func" + incPosNum] = _a;
   incPosNum++;
+  console.log(incPosNum);
+  console.log(` ${JSON.stringify(pos_func["func"+0])}`);
+  //_a값은 그대로, pos_func에는 func0에  {"checkPrinterStatus":[]}저장.
+  //insPosNum은 1
+  
 }
 
 function directPrintText(text) {

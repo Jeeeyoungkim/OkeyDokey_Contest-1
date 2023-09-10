@@ -30,39 +30,34 @@ const Favorites = () => {
 
   const dispatch = useDispatch();
 
-  // const [Mockdata, SetMockdata] = useState([
-  //   {
-  //     id: 1,
-  //     image: require('../../assets/images/coffee.png'),
-  //     name: '에스프레소',
-  //     price: 1000,
-  //   },
-  //   {
-  //     id: 2,
-  //     image: require('../../assets/images/coffee.png'),
-  //     name: '아메리카노',
-  //     price: 500,
-  //   },
-  //   {
-  //     id: 3,
-  //     image: require('../../assets/images/coffee.png'),
-  //     name: '아메리카노',
-  //     price: 1500,
-  //   },
-  //   {
-  //     id: 4,
-  //     image: require('../../assets/images/coffee.png'),
-  //     name: '아메리카노',
-  //     price: 2000,
-  //   },
-  // ]);
-  // const totalCoffeePrice = Mockdata.reduce(
-  //   (total, coffee) => total + coffee.price,
-  //   0,
-  // );
-  // console.log(totalCoffeePrice);
   const navigation = useNavigation();
 
+
+
+
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+
+        navigation.popToTop();
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
+  
+
+
+  
   const handleConfirm = () => {
     menuData.map((item, index) => {
       // console.log(item);
@@ -135,6 +130,14 @@ const Favorites = () => {
     }
   };
 
+      AsyncStorage.setItem('access', access);
+      AsyncStorage.setItem('refresh', refresh);
+      console.log('success : refresh Access Token');
+    } catch (error) {
+      console.error('Error refreshing access token:', error);
+      throw error; // 함수를 호출하는 곳에서 오류를 처리할 수 있도록 오류를 다시 던집니다.
+    }
+  };
   useEffect(() => {
     fetchData();
   }, []);
@@ -182,7 +185,7 @@ const Favorites = () => {
           <View style={styles.main}>
             <View style={styles.header}>
               <Text style={{fontWeight: 'bold', color: 'black', fontSize: 40}}>
-                {name ? name : '익명'}님이 즐겨찾는 메뉴
+                {name ? name : ''}님이 즐겨찾는 메뉴
               </Text>
             </View>
             <View style={styles.mid}>
@@ -253,15 +256,26 @@ const Favorites = () => {
           />
         </View>
       </View>
+      <View style={{flexDirection:'row'}}>
       <CustomButton
-        title={'다른 메뉴 선택하기'}
-        onPress={() => navigation.navigate('Qcoffee')}
-        width={'100%'}
+        title={'뒤로가기'}
+        onPress={() =>  navigation.goBack()}
+        width={'50%'}
         height={110}
         backgroundColor={'#056CF2'}
         textColor={'white'}
         fontSize={35}
       />
+      <CustomButton
+        title={'다른 메뉴 선택하기'}
+        onPress={() => navigation.navigate('QCoffee' , { test: 'testing' })}
+        width={'50%'}
+        height={110}
+        backgroundColor={'#056CF2'}
+        textColor={'white'}
+        fontSize={35}
+      />
+      </View>
     </SafeAreaView>
   );
 };

@@ -5,6 +5,9 @@ import axios from 'axios';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomButton from '../components/CustomButton';
+import {resetShopping} from '../redux/slices/shoppingSlice';
+import {TouchableOpacity} from 'react-native';
+import { useDispatch } from 'react-redux';
 
 const FaceRecognition = ({route}) => {
   const camera = useRef(null);
@@ -19,90 +22,94 @@ const FaceRecognition = ({route}) => {
     '오키도키로 키오스크를 편리하게 이용하세요! ',
   );
   let captureTimeout;
-  const [textIndex, setTextIndex] = useState(0);
-  const textVariations = [
-    '카메라 촬영중.',
-    '카메라 촬영중..',
-    '카메라 촬영중...',
-  ];
-  const handleContinue = () => {
+  const dispatch = useDispatch();
+  //AsyncStorage는 비회원일때 비워주고, 회원일때 이페이지 다시오면 비워준다.
+  const clearAsyncStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      console.log('AsyncStorage cleared successfully.');
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error);
+    }
+  };
+  
+
+  const handleContinue = async () => {
+    clearAsyncStorage();
+    await AsyncStorage.setItem("nonmember", "nonmember");
     navigation.navigate('Home');
   };
 
+  useEffect(() => {
+    dispatch(resetShopping());
+    clearAsyncStorage();
+  },[]);
+
   useFocusEffect(
     React.useCallback(() => {
+      console.log('useCallback setFocus true');
+      setShowCamera(true);
+      setShowText('카메라 준비중...');
       setFocusPage(true);
 
       return () => {
+        console.log('useCallback setFocus false');
+        clearTimeout(captureTimeout);
+        setShowCamera(false);
         setFocusPage(false);
       };
     }, []),
   );
-  useEffect(() => {
-    mounted.current = true; // 컴포넌트 마운트됨을 표시
-    return () => {
-      mounted.current = false; // 컴포넌트 언마운트됨을 표시
-    };
-  }, []);
-  useEffect(() => {
-    async function getPermission() {
-      const newCameraPermission = await Camera.requestCameraPermission();
-      console.log(`카메라 권한 ${newCameraPermission}`);
-    }
-    getPermission();
-  }, []);
 
-   const handleCameraInitialized = async() => {
-    setShowCamera(true);
+  const handleCameraInitialized = async () => {
     try {
-      const interval = setInterval(() => {
-        setTextIndex((prevIndex) => (prevIndex + 1) % textVariations.length);
-      }, 1000); // 1초마다 텍스트 변경
-
-      await autoCapture();
-
-      clearInterval(interval); // 사진 촬영 완료 후 인터벌 제거
-      setShowText(textVariations[0]); // 초기 텍스트로 변경
+      autoCapture();
     } catch (err) {
       console.error(err);
     }
   };
 
-  useEffect(() => {
-    if (showCamera && focusPage) {
+  const Recapture = async () => {
+    try {
+      console.log('카매라 초기화 안되서 재촬영');
       autoCapture();
+    } catch (err) {
+      console.error(err);
     }
-  }, [showCamera, focusPage]);
+  };
 
   const autoCapture = async () => {
+    console.log('autoCapture function');
     try {
+      if (!showCamera) {
+        // 카메라가 활성화되어 있지 않으면 촬영 시도하지 않음
+        console.log('!showCamera에 걸림');
+        return;
+      }
       if (camera.current == null) {
         console.log('현재 카메라 Ref 없음');
         return;
       }
-  
-      setShowText('카메라 촬영중...');
+
+      console.log('takeSnapShot');
+      setShowText('사진 촬영중 입니다...');
       const photo = await camera.current.takeSnapshot({});
       console.log(`사진촬영됐음, ${photo.path}`);
       const imageSource = photo.path;
-  
-      if (!mounted.current) {
-        clearTimeout(captureTimeout);
-        console.log('컴포넌트가 언마운트되어 작업을 중단합니다.');
-        return;
-      }
-  
-      setShowText('얼굴 인식중...');
+
       await sendPhotoToBackend(imageSource);
-   
     } catch (error) {
       console.log('autoCapture 에러:', error);
-  
+      Recapture();
+      return;
     }
   };
-  
+
+  // 카메라 재호출
 
   const sendPhotoToBackend = async imageSource => {
+    if(focusPage){
+    setShowText('얼굴 인식중 입니다...');
     let formdata = new FormData();
     formdata.append('image', {
       name: 'test.jpg',
@@ -131,18 +138,22 @@ const FaceRecognition = ({route}) => {
       await AsyncStorage.setItem('refresh', response.data.refresh);
 
       navigation.navigate('Identify');
+      return;
     } catch (error) {
       console.log('😛 Error :', error);
       console.log('😛 Error :', error.message);
-      if (error.response && error.response.status === 401) {
-        setShowText('얼굴인식 실패...');
+      if (error.response && error.response.status === 400) {
+        setShowText('인식 실패... 재촬영 중');
         captureTimeout = setTimeout(() => {
           autoCapture();
-        }, 1000);
+        }, 300);
+      }
+      if (error.response && error.response.status === 401) {
+        alert('회원가입 후 사진을 먼저 등록해주세요');
       }
     }
   };
-
+}
   if (device == null) {
     return <Text>Camera not available</Text>;
   }
@@ -157,35 +168,47 @@ const FaceRecognition = ({route}) => {
           />
         </View>
       </View>
-      <View style={{flex: 1, backgroundColor: '#D9D9D9BF'}}>
-        <View style={styles.header}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#D9D9D9BF',
+          position: 'relative',
+          zIndex: 1,
+          height: 200,
+          top: 50,
+          right: 500,
+        }}>
+        <View style={styles.guideText}>
           <Text
             style={{
               color: '#000',
               fontFamily: 'Pretendard',
-              fontSize: 20, // 수정: 숫자 값으로 변경
+              fontSize: 40, // 수정: 숫자 값으로 변경
               fontStyle: 'normal',
               fontWeight: '700',
             }}>
-            {textVariations[textIndex]}
+            {showText}
           </Text>
-          <View
+          {/* <TouchableOpacity onPress={cameraReInit}
             style={{
               backgroundColor: '#D9D9D9',
               width: 120,
               height: 120,
-            }}></View>
+            }}>
+              <Text>카메라 재촬영</Text>
+            </TouchableOpacity> */}
         </View>
       </View>
 
       {focusPage && (
-        <View style={{position: 'relative', width: 400, height: 500}}>
+        <View style={{position: 'relative', width: 1204, height: 900}}>
+        {/* <View style={{position: 'relative', width: 600, height: 700}}> */}
           <View>
             <Text></Text>
           </View>
           <Camera
             ref={camera}
-            style={{width: 400, height: 500}}
+            style={{width: 1024, height: 1280}}
             device={device}
             isActive={showCamera}
             photo={true}
@@ -220,6 +243,7 @@ const FaceRecognition = ({route}) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    position: 'relative',
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
@@ -227,9 +251,19 @@ const styles = StyleSheet.create({
   },
   header: {
     flex: 1,
+    backgroundColor: 'white',
+    flexDirection: 'row',
+
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guideText: {
+    position: 'absolute',
+    width: 1024,
+    flex: 1,
     backgroundColor: 'rgba(217, 217, 217, 0.75)',
     flexDirection: 'row',
-    backgroundColor: 'white',
+    height: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
