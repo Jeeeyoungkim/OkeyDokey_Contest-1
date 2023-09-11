@@ -12,6 +12,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import CoffeeObject from '../components/CoffeeObject';
 import CustomButton from '../components/CustomButton';
 import {useSelector} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const ShoppingBasket = ({route, navigation}) => {
   const shoppings = useSelector(state => state.shopping.shoppings);
   const {data} = route.params;
@@ -24,6 +25,30 @@ const ShoppingBasket = ({route, navigation}) => {
     });
     setTotalPrice(newTotalPrice);
   }, [shoppings]);
+
+
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+        const nonmember = await AsyncStorage.getItem('nonmember');
+        if(!nonmember){
+        navigation.popToTop();
+      }
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
 
   return (
     <SafeAreaView
@@ -104,6 +129,7 @@ const ShoppingBasket = ({route, navigation}) => {
             {shoppings.map(item => {
               return (
                 <CoffeeObject
+                  key={item.id}
                   id={item.id}
                   width={'100%'}
                   height={220}

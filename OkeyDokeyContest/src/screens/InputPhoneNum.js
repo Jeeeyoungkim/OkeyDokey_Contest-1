@@ -1,9 +1,35 @@
 import {StyleSheet, Image, View, Text, StatusBar} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
 import InputModal from '../pages/InputModal';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const InputPhoneNum = () => {
+  const navigation = useNavigation();
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+        const nonmember = await AsyncStorage.getItem('nonmember');
+        if(!nonmember){
+        navigation.popToTop();
+      }
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
+
   return (
     <SafeAreaView
       style={{

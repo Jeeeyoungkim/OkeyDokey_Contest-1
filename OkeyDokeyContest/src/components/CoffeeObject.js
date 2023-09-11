@@ -117,7 +117,7 @@ const CoffeeObject = ({
                   }}>
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 20,
                       fontWeight: 'bold',
                     }}>
                     -
@@ -138,7 +138,7 @@ const CoffeeObject = ({
                   }}>
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 20,
                       color: 'white',
                       fontWeight: 'bold',
                     }}>
@@ -196,7 +196,7 @@ const CoffeeObject = ({
                   }}>
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 20,
                       fontWeight: 'bold',
                     }}>
                     -
@@ -217,7 +217,7 @@ const CoffeeObject = ({
                   }}>
                   <Text
                     style={{
-                      fontSize: 30,
+                      fontSize: 20,
                       color: 'white',
                       fontWeight: 'bold',
                     }}>

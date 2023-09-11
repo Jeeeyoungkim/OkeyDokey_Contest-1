@@ -1,4 +1,4 @@
-import {StyleSheet, Image, View, Text, StatusBar} from 'react-native';
+import {StyleSheet, Image, View, Text, StatusBar, BackHandler} from 'react-native';
 import React from 'react';
 import CustomButton from '../components/CustomButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -6,6 +6,8 @@ import {useNavigation} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import {resetShopping} from '../redux/slices/shoppingSlice';
 import WebviewContainer from '../pages/WebviewContainer';
+import { useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OrderNum = () => {
   const dispatch = useDispatch();
@@ -21,6 +23,40 @@ const OrderNum = () => {
       routes: [{name: 'Welcome'}],
     });
   };
+
+  useEffect(() => {
+    // 30초 뒤에 accessToken 삭제 및 페이지 이동
+    const timer = setTimeout(async () => {
+      try {
+        // AsyncStorage에서 accessToken 삭제
+        await AsyncStorage.removeItem('access');
+        console.log('accessToken이 삭제되었습니다.');
+
+        // 페이지 이동
+        const nonmember = await AsyncStorage.getItem('nonmember');
+        if(!nonmember){
+        navigation.popToTop();
+      }
+      } catch (error) {
+        console.error('토큰 삭제 중 오류 발생:', error);
+      }
+    }, 300000); // 30초(30000밀리초) 후에 실행
+
+    // 컴포넌트가 언마운트될 때 타이머 정리
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      return true; // 뒤로가기 막음
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    };
+  }, []);
 
   return (
     <SafeAreaView

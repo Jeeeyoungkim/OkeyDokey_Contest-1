@@ -53,11 +53,16 @@
 	}
 
 	function viewResult(result) {
+		console.error(result);
+//사실상 view result는 쓸모가없음 그냥 network 결과보여주는것.
+		console.log(`viewResult의 결과 : ${result}`);
 		p_result.value = result;
+		
 	}
 
 	function PrintReceipt() {
-  setPosId(issueID);
+//   setPosId(issueID);
+	setPosId(1);
   checkPrinterStatus();
 
   printText("-------------------------------\n", 0, 0, false, false, false, 0, 1);
@@ -80,10 +85,10 @@
 		var strSubmit = getPosData();
 
 		console.log(strSubmit);
-
+		console.log(`p_name.value : ${p_name.value}, strStub.value : ${strSubmit}, viewResult : ${viewResult}`)
 		issueID++;
-		requestPrint(p_name.value, strSubmit, viewResult);
-
+		// requestPrint(p_name.value, strSubmit, viewResult);
+		requestPrint("Printer1", strSubmit, viewResult);
 		return true;
 	}
 
