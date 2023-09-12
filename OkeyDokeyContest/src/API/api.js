@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://15.164.232.208',
+  baseURL: 'https://www.okdkkiosk.shop/',
   headers: {
     'Content-Type': 'application/json',
   },

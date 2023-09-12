@@ -5,6 +5,7 @@ import {
   View,
   StatusBar,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -43,13 +44,20 @@ const ShoppingBasket = ({route, navigation}) => {
       } catch (error) {
         console.error('토큰 삭제 중 오류 발생:', error);
       }
-    }, 300000); // 30초(30000밀리초) 후에 실행
+    }, 600000); // 30초(30000밀리초) 후에 실행
 
     // 컴포넌트가 언마운트될 때 타이머 정리
     return () => clearTimeout(timer);
   }, [navigation]);
 
 
+  const handlePayment = () => {
+    if(totalPrice > 0) {
+      navigation.push('InputPhoneNum');
+    } else {
+      Alert.alert('알림', '결제할 메뉴가 없어요');
+    }
+  }
   return (
     <SafeAreaView
       style={{
@@ -187,7 +195,7 @@ const ShoppingBasket = ({route, navigation}) => {
           />
           <CustomButton
             title={'결제하기'}
-            onPress={() => navigation.push('InputPhoneNum')}
+            onPress={handlePayment}
             width={'50%'}
             height={80}
             backgroundColor={'#056CF2'}

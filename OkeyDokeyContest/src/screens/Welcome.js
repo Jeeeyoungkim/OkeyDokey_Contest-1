@@ -15,7 +15,7 @@ const Welcome = () => {
   const dispatch = useDispatch();
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://15.164.232.208/OKDK/signal/');
+      const response = await axios.get('https://www.okdkkiosk.shop/OKDK/signal/');
       console.log(response.data);
       if (response.data == true) {
         setDistanceSensor(true);

@@ -38,7 +38,7 @@ const Card = () => {
     try {
       console.log(requestData);
       const response = await axios.post(
-        'http://15.164.232.208/order/create/',
+        'https://www.okdkkiosk.shop/order/create/',
         requestData,
         config,
       );

@@ -57,7 +57,7 @@ const EasyMenu = ({navigation, route}) => {
       } catch (error) {
         console.error('토큰 삭제 중 오류 발생:', error);
       }
-    }, 300000); // 30초(30000밀리초) 후에 실행
+    }, 600000); // 30초(30000밀리초) 후에 실행
 
     // 컴포넌트가 언마운트될 때 타이머 정리
     return () => clearTimeout(timer);
@@ -107,7 +107,7 @@ const EasyMenu = ({navigation, route}) => {
 
   const fetchData = () => {
     axios
-      .get('http://15.164.232.208/menu/list/')
+      .get('https://www.okdkkiosk.shop/menu/list/')
       .then(response => {
         setCoffeeList(response.data.find(item => item.name === '커피'));
         setNonCoffeeList(response.data.find(item => item.name === '논커피'));
@@ -376,9 +376,9 @@ const EasyMenu = ({navigation, route}) => {
           }}>
           <View
             style={{
-              width: '78%',
+              width: '80%',
               flexDirection: 'row',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
               alignItems: 'center',
               backgroundColor: 'white',
               height: '80%',
@@ -447,7 +447,7 @@ const EasyMenu = ({navigation, route}) => {
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 4 / 10,
+                          flex:  3 / 6,
                         }}>
                         <Text
                           style={{
@@ -471,16 +471,12 @@ const EasyMenu = ({navigation, route}) => {
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 4 / 10,
+                          flex:  2 / 6,
                         }}>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              flex:1,
-                            }}>
+                     
                         <Text
                           style={{
-                            flex:1/3,
+                           
                             fontSize: 16,
                             marginRight: 10,
                             color: 'black',
@@ -490,7 +486,7 @@ const EasyMenu = ({navigation, route}) => {
                         </Text>
                         <Text
                           style={{
-                            flex:1/3,
+                           
                             fontSize: 16,
                             marginRight: 10,
                             color: 'black',
@@ -500,7 +496,7 @@ const EasyMenu = ({navigation, route}) => {
                         </Text>
                         <Text
                           style={{
-                            flex:1/3,
+                          
                             fontSize: 16,
                             color: 'black',
                             fontWeight: 'bold',
@@ -508,12 +504,12 @@ const EasyMenu = ({navigation, route}) => {
                           {item.quantity}잔
                         </Text>
                         </View>
-                      </View>
+          
 
                       <View
                         style={{
                           flexDirection: 'row',
-                          flex: 2 / 10,
+                          flex: 1/6,
                         }}>
                         <CustomButton
                           width={20}
