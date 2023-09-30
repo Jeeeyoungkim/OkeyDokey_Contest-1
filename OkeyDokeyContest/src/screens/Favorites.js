@@ -48,7 +48,7 @@ const Favorites = () => {
       } catch (error) {
         console.error('토큰 삭제 중 오류 발생:', error);
       }
-    }, 300000); // 30초(30000밀리초) 후에 실행
+    }, 600000); // 30초(30000밀리초) 후에 실행
 
     // 컴포넌트가 언마운트될 때 타이머 정리
     return () => clearTimeout(timer);
@@ -87,7 +87,7 @@ const Favorites = () => {
   const fetchData = async() => {
     try {
       const access = await AsyncStorage.getItem('access');
-      const response = await axios.get('http://15.164.232.208/menu/favorite/list/', {
+      const response = await axios.get('https://www.okdkkiosk.shop/menu/favorite/list/', {
         headers: {
           Authorization: `Bearer ${access}`, // Access Token을 Authorization 헤더에 포함
         },

@@ -25,7 +25,7 @@ const Identify = () => {
       } catch (error) {
         console.error('토큰 삭제 중 오류 발생:', error);
       }
-    }, 300000); // 30초(30000밀리초) 후에 실행
+    }, 600000); // 30초(30000밀리초) 후에 실행
 
     // 컴포넌트가 언마운트될 때 타이머 정리
     return () => clearTimeout(timer);
@@ -40,7 +40,7 @@ const Identify = () => {
       },
     };
     try {
-      const userDataGet = await axios.get("http://3.36.95.105/account/user/", config);
+      const userDataGet = await axios.get("https://www.okdkbackend.shop/account/user/", config);
       console.log(JSON.stringify(userData));
       const nickname = userDataGet.data.user.nickname;
       const mode = userDataGet.data.user.mode;
@@ -71,7 +71,7 @@ const Identify = () => {
 
     try {
       const response = await axios.post(
-        "http://3.36.95.105/account/refresh/access_token/",
+        "https://www.okdkkiosk.shop/account/refresh/access_token/",
         body,
         {
           headers: {

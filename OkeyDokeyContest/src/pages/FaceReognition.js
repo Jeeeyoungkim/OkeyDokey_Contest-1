@@ -119,7 +119,7 @@ const FaceRecognition = ({route}) => {
 
     try {
       const response = await axios.post(
-        'http://3.36.95.105/account/user/face/recognition/',
+        'https://www.okdkbackend.shop/account/user/face/recognition/',
         formdata,
         {
           headers: {'Content-Type': 'multipart/form-data'},
@@ -160,10 +160,10 @@ const FaceRecognition = ({route}) => {
 
   return (
     <View style={styles.container}>
-      <View style={{flex: 1, backgroundColor: 'white'}}>
+      <View style={{flex: 1,justifyContent:'center',alignItems:'center',backgroundColor: 'white'}}>
         <View style={styles.header}>
           <Image
-            style={{width: 150, height: 50, backgroundColor: 'white'}}
+            style={{width: 150, height: 50, marginTop:50,backgroundColor: 'white'}}
             source={require('OkeyDokeyContest/assets/images/OkDkLogo.png')}
           />
         </View>
@@ -175,7 +175,7 @@ const FaceRecognition = ({route}) => {
           position: 'relative',
           zIndex: 1,
           height: 200,
-          top: 50,
+          top: 53  ,
           right: 500,
         }}>
         <View style={styles.guideText}>
@@ -189,26 +189,23 @@ const FaceRecognition = ({route}) => {
             }}>
             {showText}
           </Text>
-          {/* <TouchableOpacity onPress={cameraReInit}
+          <View
             style={{
               backgroundColor: '#D9D9D9',
-              width: 120,
-              height: 120,
+              width: 90,
+              height: 90,
             }}>
-              <Text>카메라 재촬영</Text>
-            </TouchableOpacity> */}
+            </View>
         </View>
       </View>
 
       {focusPage && (
-        <View style={{position: 'relative', width: 1204, height: 900}}>
-        {/* <View style={{position: 'relative', width: 600, height: 700}}> */}
-          <View>
-            <Text></Text>
-          </View>
+        <View style={{position: 'relative', width: 1204, height: 950}}>
+        {/* <View style={{position: 'relative', width: 600, height: 700}}>  */}
+       
           <Camera
             ref={camera}
-            style={{width: 1024, height: 1280}}
+            style={{width: 1024, height: 1000}}
             device={device}
             isActive={showCamera}
             photo={true}
@@ -252,8 +249,6 @@ const styles = StyleSheet.create({
   header: {
     flex: 1,
     backgroundColor: 'white',
-    flexDirection: 'row',
-
     alignItems: 'center',
     justifyContent: 'center',
   },
